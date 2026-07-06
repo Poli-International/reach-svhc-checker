@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="robots" content="noindex, nofollow">
+  <script>
+    if (window.self !== window.top) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.body && document.body.classList.add('dark-mode');
+      window.addEventListener('message', function(e) {
+        if (e.data && e.data.type === 'poli-theme') {
+          if (e.data.light) {
+            document.documentElement.setAttribute('data-theme', 'light');
+          } else {
+            document.documentElement.setAttribute('data-theme', 'dark');
+          }
+        }
+      });
+    }
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Check tattoo ink, body jewelry, and studio product ingredients against the ECHA SVHC Candidate List. Paste a full SDS ingredient block for instant REACH compliance screening.">
+  <meta name="keywords" content="SVHC checker, REACH compliance, tattoo ink SVHC, body jewelry REACH, ECHA candidate list, SDS ingredient check, EU REACH pigment safety">
+  <title>REACH SVHC Pigment Checker | Poli International</title>
+
+  <meta property="og:type"        content="website">
+  <meta property="og:title"       content="REACH SVHC Pigment Checker | Poli International">
+  <meta property="og:description" content="Instantly flag SVHC substances in tattoo inks and body jewelry ingredients against the live ECHA Candidate List.">
+  <meta property="og:url"         content="https://poliinternational.com/reach-svhc-checker/">
+  <meta property="og:site_name"   content="Poli International">
+  <meta property="og:image"       content="https://poliinternational.com/uploads/branding/poli-international-company-logo.png">
+
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="REACH SVHC Pigment Checker | Poli International">
+  <meta name="twitter:description" content="Flag SVHC substances in tattoo & piercing products against the ECHA Candidate List.">
+  <meta name="twitter:image"       content="https://poliinternational.com/uploads/branding/poli-international-company-logo.png">
+
+  <link rel="stylesheet" href="/tools/reach-svhc-checker/css/style.css">
+</head>
+<body>
+
+<div class="tool-wrapper">
+
+  <!-- Header -->
+  <header class="tool-header">
+    <div class="tool-header__badge">
+      <span>⚗️</span> REACH Compliance Tool
+    </div>
+    <h1>REACH SVHC Pigment Checker</h1>
+    <p>
+      Flag Substances of Very High Concern in tattoo inks, body jewelry alloys,
+      and studio products against the ECHA Candidate List
+      (<span id="svhc-date"></span> · <span id="svhc-count"></span> substances).
+    </p>
+  </header>
+
+  <!-- Tabs -->
+  <div class="tabs" role="tablist">
+    <button class="tab-btn active" data-tab="search" role="tab" aria-selected="true">
+      🔍 Search ingredient
+    </button>
+    <button class="tab-btn" data-tab="bulk" role="tab" aria-selected="false">
+      📋 Paste SDS block
+    </button>
+  </div>
+
+  <!-- ── Tab 1: Single search ────────────────────────────────── -->
+  <div id="panel-search" class="tab-panel active">
+    <div class="input-card">
+      <label class="input-label" for="search-input">Ingredient name or CAS number</label>
+      <div class="search-row">
+        <input
+          type="text"
+          id="search-input"
+          class="input-field"
+          placeholder="e.g. Nickel, 7440-02-0, cobalt blue, DEHP…"
+          autocomplete="off"
+          spellcheck="false"
+        >
+        <button id="search-btn" class="btn btn-primary">Check</button>
+      </div>
+      <p class="input-hint">
+        Accepts ingredient names, aliases, CAS numbers, or EC numbers.
+        Covers metals, PAHs, phthalates, aromatic amines, and other SVHC categories relevant to body art.
+      </p>
+    </div>
+    <div id="search-results"></div>
+  </div>
+
+  <!-- ── Tab 2: Bulk SDS scan ────────────────────────────────── -->
+  <div id="panel-bulk" class="tab-panel">
+    <div class="input-card">
+      <label class="input-label" for="bulk-input">Ingredient list or SDS Section 3</label>
+      <textarea
+        id="bulk-input"
+        class="input-field"
+        placeholder="Paste the full ingredient list or SDS Section 3 (Composition) here.&#10;&#10;Example:&#10;Aqua, Glycerin, Iron oxide CI 77491, Pigment Black 11 (7227-10-5),&#10;D&amp;C Red 6 (1248-18-6), Nickel sulfate (10101-97-0)…"
+        spellcheck="false"
+      ></textarea>
+      <p class="input-hint">
+        The scanner extracts CAS numbers (e.g. <code>7440-02-0</code>) and ingredient names,
+        then checks each against the SVHC list. Works with INCI lists, SDS sections, and raw ingredient blocks.
+      </p>
+      <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
+        <button id="bulk-scan-btn" class="btn btn-primary">⚡ Scan for SVHCs</button>
+        <button id="bulk-clear-btn" class="btn btn-secondary">Clear</button>
+      </div>
+    </div>
+    <div id="bulk-results"></div>
+  </div>
+
+  <!-- Disclaimer -->
+  <div class="disclaimer">
+    <strong>Legal disclaimer:</strong> This tool screens against a curated body-art subset of the
+    <a href="https://echa.europa.eu/candidate-list-table" target="_blank" rel="noopener noreferrer">ECHA SVHC Candidate List</a>
+    (last updated <span id="svhc-date-2"></span>; official list contains <span id="svhc-count-2"></span> substances).
+    A negative result does not constitute regulatory clearance.
+    Always verify against the <a href="https://echa.europa.eu/candidate-list-table" target="_blank" rel="noopener noreferrer">official ECHA list</a>
+    and consult your supplier's Safety Data Sheet for legally binding information.
+    Not a substitute for professional regulatory advice.
+  </div>
+
+</div><!-- /tool-wrapper -->
+
+<script src="/tools/reach-svhc-checker/js/svhc-data.js"></script>
+<script src="/tools/reach-svhc-checker/js/app.js"></script>
+<script>
+  // Populate date/count placeholders
+  document.querySelectorAll('#svhc-date, #svhc-date-2').forEach(el => {
+    el.textContent = SVHC_LIST_DATE;
+  });
+  document.querySelectorAll('#svhc-count, #svhc-count-2').forEach(el => {
+    el.textContent = SVHC_TOTAL_OFFICIAL;
+  });
+
+  // Apply dark theme if in iframe before DOMContentLoaded fires
+  if (window.self !== window.top) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+</script>
+</body>
+</html>
