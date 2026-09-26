@@ -1,14 +1,40 @@
 /*
-  REACH SVHC Candidate List — Body Art Edition
-  Poli International | Last updated: May 2026
+  REACH SVHC Candidate List - Body Art Curated Edition
+  Poli International | 2026
+  Snapshot date: 27 June 2024 (ECHA Candidate List release)
   Source: ECHA Candidate List (https://echa.europa.eu/candidate-list-table)
-  Curated for tattoo inks, body jewelry, aftercare & studio products.
-  ~244 substances on the official list; 80 highest-relevance entries included here.
-  Always verify against the live ECHA list for legally binding information.
+  Curated subset of 51 substances, selected from the Candidate List as of 27 June 2024
+  (253 entries as of 4 February 2026),
+  selected specifically for relevance to body art (tattoo inks, PMU pigments,
+  body jewelry alloys, and studio consumables).
+  Always verify against the official ECHA Candidate List for legally binding information.
 */
 
-const SVHC_LIST_DATE = '2026-01-14';
-const SVHC_TOTAL_OFFICIAL = 244;
+const SVHC_METADATA = {
+  listDate: '27 June 2024',
+  snapshotIso: '2024-06-27',
+  // Verified 2026-09-15 by the site's REACH Monitor: 253 entries since ECHA's 4 February 2026
+  // update. The curated subset below was selected from the list as of listDate and has not yet
+  // been re-screened for later additions; the stale banner tells readers to check ECHA.
+  officialTotal: 253,
+  subsetCount: 51,
+  sourceUrl: 'https://echa.europa.eu/candidate-list-table'
+};
+
+const SVHC_LIST_DATE = SVHC_METADATA.listDate;
+const SVHC_TOTAL_OFFICIAL = SVHC_METADATA.officialTotal;
+const SVHC_SUBSET_COUNT = SVHC_METADATA.subsetCount;
+
+function isSnapshotStale() {
+  const snapTime = new Date(SVHC_METADATA.snapshotIso).getTime();
+  const now = Date.now();
+  const daysOld = (now - snapTime) / (1000 * 60 * 60 * 24);
+  return {
+    isStale: daysOld > 180,
+    daysOld: Math.floor(daysOld),
+    monthsOld: Math.floor(daysOld / 30.44)
+  };
+}
 
 const SVHC_DATA = [
 
@@ -154,7 +180,7 @@ const SVHC_DATA = [
     reason_short: 'PBT',
     category: 'metal',
     body_art_relevance: 'medium',
-    found_in: ['mercuric sulphide (Vermilion — historic red pigment)', 'historically in some red tattoo inks'],
+    found_in: ['mercuric sulphide (Vermilion - historic red pigment)', 'historically in some red tattoo inks'],
     also_known_as: ['Hg', 'quicksilver', 'mercury metal'],
     echa_url: 'https://echa.europa.eu/search-for-chemicals?p_p_id=dissadvancedsearch_WAR_dissadvancedsearchportlet&_dissadvancedsearch_WAR_dissadvancedsearchportlet_searchString=7439-97-6',
   },
@@ -623,7 +649,7 @@ const SVHC_DATA = [
     ec: '217-179-8',
     reason: 'PBT, vPvB, Endocrine Disruptor',
     reason_short: 'PBT + vPvB + ED',
-    category: 'halogenated',
+    category: 'pfas',
     body_art_relevance: 'medium',
     found_in: ['fire-fighting foams', 'stain-resistant coatings', 'some cleaning products'],
     also_known_as: ['perfluorooctylsulfonate', 'PFOS acid'],
@@ -636,7 +662,7 @@ const SVHC_DATA = [
     ec: '206-397-9',
     reason: 'PBT, Carcinogenic (Cat. 1B)',
     reason_short: 'PBT + Carcinogenic',
-    category: 'halogenated',
+    category: 'pfas',
     body_art_relevance: 'medium',
     found_in: ['non-stick coatings (equipment)', 'some water-resistant textiles'],
     also_known_as: ['C8', 'pentadecafluorooctanoic acid', 'perfluorooctanoate'],
@@ -666,7 +692,7 @@ const SVHC_DATA = [
     ec: '233-139-2',
     reason: 'Reprotoxic (Cat. 1B)',
     reason_short: 'Reprotoxic',
-    category: 'boron',
+    category: 'borate',
     body_art_relevance: 'low',
     found_in: ['antiseptic solutions', 'eye washes', 'some preservatives'],
     also_known_as: ['orthoboric acid', 'boracic acid', 'H3BO3'],
@@ -679,7 +705,7 @@ const SVHC_DATA = [
     ec: '215-540-4',
     reason: 'Reprotoxic (Cat. 1B)',
     reason_short: 'Reprotoxic',
-    category: 'boron',
+    category: 'borate',
     body_art_relevance: 'low',
     found_in: ['cleaning products', 'flux in jewellery making'],
     also_known_as: ['sodium borate', 'sodium tetraborate decahydrate', 'borax'],
@@ -696,7 +722,7 @@ const SVHC_DATA = [
     ec: '209-136-7',
     reason: 'PBT, vPvB, Endocrine Disruptor',
     reason_short: 'PBT + ED',
-    category: 'other',
+    category: 'siloxane',
     body_art_relevance: 'medium',
     found_in: ['silicone-based aftercare products', 'cosmetic silicone ingredients', 'some tattoo aftercare creams'],
     also_known_as: ['cyclic octamethylsiloxane', 'cyclotetrasiloxane', 'D4 silicone'],
@@ -709,7 +735,7 @@ const SVHC_DATA = [
     ec: '208-764-9',
     reason: 'PBT, vPvB',
     reason_short: 'PBT + vPvB',
-    category: 'other',
+    category: 'siloxane',
     body_art_relevance: 'medium',
     found_in: ['silicone aftercare products', 'cosmetic creams and serums', 'skin barrier products'],
     also_known_as: ['cyclic decamethylsiloxane', 'cyclomethicone', 'D5 silicone'],
@@ -718,73 +744,344 @@ const SVHC_DATA = [
 
 ];
 
-// ── Utility: all aliases (name + also_known_as + CAS) for matching
+// ── Search & Matching Engine ──────────────────────────────────────
+
+const CAS_PATTERN = /\b(\d{1,7}-\d{2}-\d)\b/g;
+
+function normalizeName(s) {
+  if (!s) return '';
+  return s.toLowerCase().replace(/[^a-z0-9\-]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+function escapeRegex(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function extractAliasesFromName(name) {
+  const aliases = [];
+  const parenMatch = name.match(/\(([^)]+)\)/);
+  if (parenMatch) {
+    aliases.push(parenMatch[1].trim());
+    const withoutParen = name.replace(/\([^)]+\)/, '').trim();
+    if (withoutParen) aliases.push(withoutParen);
+  }
+  return aliases;
+}
+
 function buildSearchIndex(list) {
-  const index = [];
-  list.forEach(s => {
-    const tokens = [
-      s.name,
-      ...s.also_known_as,
-      ...s.cas,
-    ].map(t => t.toLowerCase().trim());
-    index.push({ substance: s, tokens });
+  return list.map(s => {
+    const rawName = s.name || '';
+    const nameNorm = normalizeName(rawName);
+    const extraAliases = extractAliasesFromName(rawName);
+    const allAliases = [
+      ...(s.also_known_as || []),
+      ...(s.ci_mappings || []),
+      ...extraAliases
+    ];
+    const aliasesNorm = allAliases.map(a => normalizeName(a)).filter(Boolean);
+    const casSet = new Set((s.cas || []).map(c => c.trim()));
+    const ec = (s.ec || '').trim().toLowerCase();
+
+    // Significant keywords of length >= 3
+    const significantWords = nameNorm
+      .split(/\s+/)
+      .filter(w => w.length >= 3 && !['and', 'for', 'the', 'with', 'cat'].includes(w));
+
+    return {
+      substance: s,
+      nameNorm,
+      aliasesNorm,
+      casSet,
+      ec,
+      significantWords
+    };
   });
-  return index;
 }
 
 const SEARCH_INDEX = buildSearchIndex(SVHC_DATA);
 
-// CAS pattern
-const CAS_PATTERN = /\b(\d{1,7}-\d{2}-\d)\b/g;
-
-function normalizeName(s) {
-  return s.toLowerCase().replace(/[^a-z0-9,\[\]\(\)\-]/g, ' ').replace(/\s+/g, ' ').trim();
-}
-
+/**
+ * Searches for a match against the SVHC database.
+ * Returns an object with { substance, confidence, matchType, matchedToken } or null.
+ * Confidence: 'high' | 'medium'
+ */
 function findByQuery(query) {
-  const q = normalizeName(query);
-  if (!q) return null;
-  for (const entry of SEARCH_INDEX) {
-    for (const token of entry.tokens) {
-      if (token === q) return entry.substance;
-      if (token.includes(q) && q.length > 4) return entry.substance;
-      if (q.includes(token) && token.length > 6) return entry.substance;
+  if (!query || typeof query !== 'string') return null;
+  const raw = query.trim();
+  const cleanedRaw = raw
+    .replace(/\s*(?:[<>≤≥~]?\s*\d+(?:\.\d+)?\s*(?:-\s*\d+(?:\.\d+)?)?\s*(?:%|wt%|w\/w|ppm))\s*$/i, '')
+    .trim();
+  const qNorm = normalizeName(cleanedRaw || raw);
+  if (!qNorm && !raw) return null;
+
+  // 1. Direct CAS match (high confidence)
+  const directCas = cleanedRaw.match(/^\d{1,7}-\d{2}-\d$/) || raw.match(/^\d{1,7}-\d{2}-\d$/);
+  if (directCas) {
+    const found = SVHC_DATA.find(s => s.cas && s.cas.includes(directCas[0]));
+    if (found) {
+      return {
+        substance: found,
+        confidence: 'high',
+        matchType: 'cas',
+        matchedToken: directCas[0]
+      };
     }
   }
+
+  // 2. Exact name match (high confidence)
+  for (const entry of SEARCH_INDEX) {
+    if (entry.nameNorm === qNorm) {
+      return {
+        substance: entry.substance,
+        confidence: 'high',
+        matchType: 'exact_name',
+        matchedToken: entry.substance.name
+      };
+    }
+  }
+
+  // 3. Exact alias match (high confidence)
+  for (const entry of SEARCH_INDEX) {
+    for (const alias of entry.aliasesNorm) {
+      if (alias === qNorm) {
+        return {
+          substance: entry.substance,
+          confidence: 'high',
+          matchType: 'alias',
+          matchedToken: alias
+        };
+      }
+    }
+  }
+
+  // 4. Word boundary regex match on substance name or significant alias (medium confidence)
+  for (const entry of SEARCH_INDEX) {
+    if (entry.nameNorm.length >= 3) {
+      const boundaryRegex = new RegExp('(?:^|\\b)' + escapeRegex(entry.nameNorm) + '(?:\\b|$)', 'i');
+      if (boundaryRegex.test(qNorm)) {
+        return {
+          substance: entry.substance,
+          confidence: 'medium',
+          matchType: 'boundary',
+          matchedToken: entry.substance.name
+        };
+      }
+    }
+
+    for (const alias of entry.aliasesNorm) {
+      if (alias.length >= 3) {
+        const aliasRegex = new RegExp('(?:^|\\b)' + escapeRegex(alias) + '(?:\\b|$)', 'i');
+        if (aliasRegex.test(qNorm)) {
+          return {
+            substance: entry.substance,
+            confidence: 'medium',
+            matchType: 'boundary',
+            matchedToken: alias
+          };
+        }
+      }
+    }
+  }
+
+  // 5. Multi-token keyword overlap (medium confidence)
+  for (const entry of SEARCH_INDEX) {
+    if (entry.significantWords.length >= 2) {
+      const allWordsPresent = entry.significantWords.every(word => {
+        const wRegex = new RegExp('(?:^|\\b)' + escapeRegex(word) + '(?:\\b|$)', 'i');
+        return wRegex.test(qNorm);
+      });
+      if (allWordsPresent) {
+        return {
+          substance: entry.substance,
+          confidence: 'medium',
+          matchType: 'token_overlap',
+          matchedToken: entry.significantWords.join(' ')
+        };
+      }
+    }
+  }
+
   return null;
+}
+
+const CONCENTRATION_PATTERN = /(?:[<>≤≥~]?\s*\d+(?:\.\d+)?\s*(?:-\s*\d+(?:\.\d+)?)?\s*(?:%|wt%|w\/w|ppm))/i;
+
+function parseConcentrationToken(text) {
+  if (!text) return null;
+  const match = text.match(CONCENTRATION_PATTERN);
+  if (!match) return null;
+  const rawToken = match[0].trim();
+  
+  // Try to parse numeric value or range
+  const numMatches = rawToken.match(/\d+(?:\.\d+)?/g);
+  if (!numMatches || numMatches.length === 0) {
+    return { token: rawToken, value: null, status: 'ambiguous' };
+  }
+
+  // Handle ppm conversion to %
+  const isPpm = /ppm/i.test(rawToken);
+  let values = numMatches.map(n => parseFloat(n));
+  if (isPpm) {
+    values = values.map(v => v / 10000); // 10,000 ppm = 1%
+  }
+
+  // If range, take maximum concentration in range
+  const maxVal = Math.max(...values);
+  
+  // Check against REACH Art 33 threshold: 0.1% w/w
+  let status = 'ambiguous';
+  if (rawToken.includes('<') || rawToken.includes('≤')) {
+    if (maxVal <= 0.1) status = 'below';
+    else status = 'ambiguous';
+  } else if (rawToken.includes('>') || rawToken.includes('≥')) {
+    if (maxVal >= 0.1) status = 'above';
+    else status = 'ambiguous';
+  } else {
+    status = maxVal > 0.1 ? 'above' : 'below';
+  }
+
+  return {
+    token: rawToken,
+    value: maxVal,
+    status
+  };
 }
 
 function parseIngredientBlock(text) {
   const results = [];
-  const seen = new Set();
+  const seenCas = new Set();
+  const seenNames = new Set();
 
-  // 1. Extract CAS numbers
-  const casMatches = text.matchAll(CAS_PATTERN);
-  for (const match of casMatches) {
-    const cas = match[1];
-    if (seen.has(cas)) continue;
-    seen.add(cas);
-    const found = SVHC_DATA.find(s => s.cas.includes(cas));
-    results.push({ query: cas, type: 'cas', substance: found || null });
+  // Split text by lines first to preserve per-line concentration context
+  const rawLines = text.split(/[\r\n]+/).map(l => l.trim()).filter(Boolean);
+
+  // 1. Line-by-line inspection
+  for (const line of rawLines) {
+    const conc = parseConcentrationToken(line);
+    const inlineCas = line.match(CAS_PATTERN);
+
+    if (inlineCas) {
+      for (const cas of inlineCas) {
+        if (seenCas.has(cas)) continue;
+        seenCas.add(cas);
+        const found = SVHC_DATA.find(s => s.cas && s.cas.includes(cas));
+        results.push({
+          query: cas,
+          type: 'cas',
+          substance: found || null,
+          confidence: found ? 'high' : null,
+          matchType: 'cas',
+          matchedToken: cas,
+          concentration: conc
+        });
+      }
+    }
+
+    // Try name extraction after cleaning out CAS and concentration
+    const cleaned = line
+      .replace(CAS_PATTERN, ' ')
+      .replace(CONCENTRATION_PATTERN, ' ')
+      .replace(/[\(\)\[\]:,;]/g, ' ')
+      .trim();
+
+    if (cleaned.length >= 3 && !/^\d+$/.test(cleaned)) {
+      const segments = cleaned.split(/\s{2,}|\t+/).map(s => s.trim()).filter(s => s.length >= 3);
+      const candidates = segments.length > 0 ? segments : [cleaned];
+
+      for (const cand of candidates) {
+        if (/^\d+(\.\d+)?%?$/.test(cand)) continue;
+        const normKey = normalizeName(cand);
+        if (seenNames.has(normKey)) continue;
+        seenNames.add(normKey);
+
+        const match = findByQuery(cand);
+        if (match) {
+          results.push({
+            query: cand,
+            type: 'name',
+            substance: match.substance,
+            confidence: match.confidence,
+            matchType: match.matchType,
+            matchedToken: match.matchedToken,
+            concentration: conc
+          });
+        }
+      }
+    }
   }
 
-  // 2. Extract lines without CAS — try name matching
-  const lines = text.split(/[\n,;]+/).map(l => l.trim()).filter(l => l.length > 3);
-  for (const line of lines) {
-    // Skip lines that are mostly numbers/percent/already processed
-    if (/^\d+(\.\d+)?%?$/.test(line)) continue;
-    // Strip trailing % concentration info
-    const cleaned = line.replace(/\s+\d+(\.\d+)?%?$/, '').replace(/\s+\d+(\.\d+)?-\d+(\.\d+)?%$/, '').trim();
-    if (cleaned.length < 3) continue;
-    if (seen.has(cleaned.toLowerCase())) continue;
-    seen.add(cleaned.toLowerCase());
-    const found = findByQuery(cleaned);
-    if (found) {
-      results.push({ query: cleaned, type: 'name', substance: found });
-    } else {
-      results.push({ query: cleaned, type: 'name', substance: null });
+  // 2. Fallback sweep over comma-delimited tokens if no results from lines
+  if (results.length === 0) {
+    const tokens = text.split(/[,;]+/).map(t => t.trim()).filter(t => t.length >= 3);
+    for (const tok of tokens) {
+      const conc = parseConcentrationToken(tok);
+      const cleaned = tok.replace(CONCENTRATION_PATTERN, '').trim();
+      const casMatches = cleaned.match(CAS_PATTERN);
+      if (casMatches) {
+        for (const cas of casMatches) {
+          if (seenCas.has(cas)) continue;
+          seenCas.add(cas);
+          const found = SVHC_DATA.find(s => s.cas && s.cas.includes(cas));
+          results.push({
+            query: cas,
+            type: 'cas',
+            substance: found || null,
+            confidence: found ? 'high' : null,
+            matchType: 'cas',
+            matchedToken: cas,
+            concentration: conc
+          });
+        }
+      } else {
+        const normKey = normalizeName(cleaned);
+        if (seenNames.has(normKey)) continue;
+        seenNames.add(normKey);
+        const match = findByQuery(cleaned);
+        results.push({
+          query: cleaned,
+          type: 'name',
+          substance: match ? match.substance : null,
+          confidence: match ? match.confidence : null,
+          matchType: match ? match.matchType : null,
+          matchedToken: match ? match.matchedToken : null,
+          concentration: conc
+        });
+      }
     }
   }
 
   return results;
+}
+
+// Environment exports
+if (typeof window !== 'undefined') {
+  window.SVHC_METADATA = SVHC_METADATA;
+  window.SVHC_LIST_DATE = SVHC_LIST_DATE;
+  window.SVHC_TOTAL_OFFICIAL = SVHC_TOTAL_OFFICIAL;
+  window.SVHC_SUBSET_COUNT = SVHC_SUBSET_COUNT;
+  window.SVHC_DATA = SVHC_DATA;
+  window.SEARCH_INDEX = SEARCH_INDEX;
+  window.CAS_PATTERN = CAS_PATTERN;
+  window.CONCENTRATION_PATTERN = CONCENTRATION_PATTERN;
+  window.parseConcentrationToken = parseConcentrationToken;
+  window.isSnapshotStale = isSnapshotStale;
+  window.findByQuery = findByQuery;
+  window.parseIngredientBlock = parseIngredientBlock;
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    SVHC_METADATA,
+    SVHC_LIST_DATE,
+    SVHC_TOTAL_OFFICIAL,
+    SVHC_SUBSET_COUNT,
+    SVHC_DATA,
+    SEARCH_INDEX,
+    CAS_PATTERN,
+    CONCENTRATION_PATTERN,
+    parseConcentrationToken,
+    isSnapshotStale,
+    findByQuery,
+    parseIngredientBlock
+  };
 }
